@@ -1,0 +1,13 @@
+/result
+
+**/inventory
+
+# terraform
+**/.terraform/*
+**.auto.tfvars
+**.tfstate
+**.tfstate.backup
+
+# nix and direnv
+**/.pre-commit-config.yaml
+**/.direnv/*
