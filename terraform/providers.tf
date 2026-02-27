@@ -7,6 +7,10 @@ terraform {
       version = "3.0.2-rc07"
       #version = "~> 3.0.2"
     }
+    dns = {
+      source  = "hashicorp/dns"
+      version = "~> 3.5.0"
+    }
   }
 }
 
@@ -50,4 +54,52 @@ provider "proxmox" {
   #   _default    = "debug"
   #   _capturelog = ""
   # }
+}
+
+variable "dns_server" {
+  type        = string
+  description = "Authoritative server IP"
+  default     = "0.0.0.0"
+  validation {
+    condition     = can(regex("^([0-9]{1,3}[.]){3}[0-9]{1,3}$", var.dns_server))
+    error_message = "Invalid server IP"
+  }
+}
+
+variable "dns_key_name" {
+  type        = string
+  description = "Tsig key name"
+  validation {
+    condition     = can(regex("^[a-zA-Z0-9-_.]+\\.$", var.dns_key_name))
+    error_message = "Key name cannot be empty and must end with a dot"
+  }
+}
+
+variable "dns_key_algorithm" {
+  type        = string
+  description = "Tsig key algorithm"
+  default     = "hmac-sha256"
+  validation {
+    condition     = can(regex("^hmac-sha(1|2|256|256-128|512|512-128)$", var.dns_key_algorithm))
+    error_message = "Invalid tsig key algorithm"
+  }
+}
+
+variable "dns_key_secret" {
+  type        = string
+  description = "Tsig key secret"
+  sensitive   = true
+  validation {
+    condition     = length(var.dns_key_secret) >= 8
+    error_message = "The key cannot be this short"
+  }
+}
+
+provider "dns" {
+  update {
+    server        = var.dns_server
+    key_name      = var.dns_key_name
+    key_algorithm = var.dns_key_algorithm
+    key_secret    = var.dns_key_secret
+  }
 }

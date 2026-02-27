@@ -53,7 +53,29 @@ variable "nameserver" {
 variable "searchdomain" {
   type        = string
   description = "Search domain"
+  nullable    = false
+  default     = "" # Defaults to var.dns_name, see locals
+}
+
+variable "dns_zone" {
+  type        = string
+  description = "DNS zone"
+  nullable    = false
   default     = ""
+  validation {
+    condition     = can(regex("^(|[a-z0-9-.]+\\.)$", var.dns_zone))
+    error_message = "Invalid DNS zone, must be empty or a fully qualified domain"
+  }
+}
+
+variable "cluster_name" {
+  type        = string
+  description = "Cluster name, used for DNS load balancing"
+  default     = "kube"
+  validation {
+    condition     = can(regex("^[a-z0-9-]+$", var.cluster_name))
+    error_message = "Invalid cluster name"
+  }
 }
 
 variable "ssh_public_keys" {
@@ -69,6 +91,10 @@ variable "password" {
     condition     = length(var.password) >= 5
     error_message = "Container password must be at least 5 character long"
   }
+}
+
+locals {
+  searchdomain = var.searchdomain == "" ? trimpostfix(var.dns_zone, ".") : var.searchdomain
 }
 
 resource "proxmox_vm_qemu" "kube" {
@@ -110,7 +136,7 @@ resource "proxmox_vm_qemu" "kube" {
   sshkeys      = join("\n", [for p in var.ssh_public_keys : file(pathexpand(p))])
   ipconfig0    = each.value.network
   nameserver   = var.nameserver
-  searchdomain = var.searchdomain
+  searchdomain = local.searchdomain
   skip_ipv6    = true # Acquiring an IPv6 address from the qemu guest agent isn't required
 
   # HW settings
@@ -178,4 +204,26 @@ resource "null_resource" "wait_for_vm" {
     }
   }
   depends_on = [proxmox_vm_qemu.kube]
+}
+
+resource "dns_a_record_set" "hosts_a_records" {
+  for_each = (var.dns_server != "0.0.0.0" && var.dns_zone != "") ? proxmox_vm_qemu.kube : {}
+
+  zone      = var.dns_zone
+  name      = each.value.name
+  addresses = [each.value.default_ipv4_address]
+  ttl       = 300 # 5 minutes
+
+  depends_on = [null_resource.wait_for_vm]
+}
+
+resource "dns_a_record_set" "cluster_a_record" {
+  count = (var.dns_server != "0.0.0.0" && var.dns_zone != "") ? 1 : 0
+
+  zone      = var.dns_zone
+  name      = var.cluster_name
+  addresses = [for n in proxmox_vm_qemu.kube : n.default_ipv4_address]
+  ttl       = 300 # 5 minutes
+
+  depends_on = [null_resource.wait_for_vm]
 }
