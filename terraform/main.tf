@@ -78,6 +78,18 @@ variable "cluster_name" {
   }
 }
 
+variable "cluster_vip" {
+  type        = list(string)
+  description = "Cluster virtual IPs"
+  default     = null
+  validation {
+    condition = null || (length(var.cluster_vip) > 0 && alltrue([
+      for i in var.cluster_vip : can(regex("^([0-9]{1,3}[.]){3}[0-9]{1,3}$", i))
+    ]))
+    error_message = "Invalid cluster virtual IP, must be null or a list of valid IPs"
+  }
+}
+
 variable "ssh_public_keys" {
   type        = list(string)
   description = "SSH public key files"
@@ -95,6 +107,7 @@ variable "password" {
 
 locals {
   searchdomain = var.searchdomain == "" ? trimpostfix(var.dns_zone, ".") : var.searchdomain
+  cluster_vip  = var.cluster_vip == null ? [for n in proxmox_vm_qemu.kube : n.default_ipv4_address] : var.cluster_vip
 }
 
 resource "proxmox_vm_qemu" "kube" {
@@ -122,8 +135,8 @@ resource "proxmox_vm_qemu" "kube" {
     #limit   = 4
     #units   = 1024
   }
-  memory  = 2048
-  balloon = 256 # Minimum allocated memory
+  memory  = 2355
+  balloon = 512 # Minimum allocated memory
 
   # High Availability settings
   #hastate = ""
@@ -222,7 +235,7 @@ resource "dns_a_record_set" "cluster_a_record" {
 
   zone      = var.dns_zone
   name      = var.cluster_name
-  addresses = [for n in proxmox_vm_qemu.kube : n.default_ipv4_address]
+  addresses = local.cluster_vip
   ttl       = 300 # 5 minutes
 
   depends_on = [null_resource.wait_for_vm]
