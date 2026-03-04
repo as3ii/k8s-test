@@ -1,0 +1,19 @@
+default: check dry
+
+init:
+    tofu init
+
+fmt:
+    tofu fmt
+
+check: init
+    tofu validate
+
+dry: init
+    tofu plan
+
+deploy: check
+    tofu apply
+
+destroy:
+    tofu destroy
