@@ -1,0 +1,16 @@
+default: check dry
+
+fmt:
+    @echo "TODO fmt"
+
+check:
+    ansible-lint
+
+dry:
+    ansible-playbook main.yaml --check
+
+deploy:
+    ansible-playbook main.yaml
+
+reset:
+    ansible-playbook reset/reset.yaml

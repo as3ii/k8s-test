@@ -1,0 +1,39 @@
+---
+- name: Update system
+  ansible.builtin.apt:
+    update_cache: true
+    upgrade: safe
+    autoclean: true
+
+- name: Ensure QEMU guest agend is installed
+  ansible.builtin.apt:
+    name:
+      - qemu-guest-agent
+    state: present
+
+- name: Ensure QEMU guest agent is running
+  ansible.builtin.systemd:
+    name: qemu-guest-agent
+    enabled: true
+    state: started
+
+- name: Enable IPv4 forwarding
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: "1"
+    state: present
+    reload: true
+
+- name: Enable IPv6 forwarding
+  ansible.posix.sysctl:
+    name: net.ipv6.conf.all.forwarding
+    value: "1"
+    state: present
+    reload: true
+
+- name: Enable IPv6 router advertisements
+  ansible.posix.sysctl:
+    name: net.ipv6.conf.all.accept_ra
+    value: "2"
+    state: present
+    reload: true

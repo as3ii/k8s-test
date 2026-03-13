@@ -1,0 +1,12 @@
+---
+- name: Collect names
+  ansible.builtin.shell: set -o pipefail && cat /proc/mounts | awk '{print $2}' | grep "{{ mountpoint }}"
+  register: mounts
+  failed_when: false
+  changed_when: false
+
+- name: Unmount FSs
+  ansible.posix.mount:
+    path: "{{ item }}"
+    state: unmounted
+  loop: "{{ mounts.stdout_lines | reverse | list }}"

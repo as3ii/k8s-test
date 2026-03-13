@@ -66,10 +66,13 @@
               ansible
               opentofu
               just
+              kubectl
             ];
 
             shellHook = ''
               ${config.pre-commit.shellHook}
+              export KUBECONFIG="./kubeconfig"
+              alias kwatch="watch -- kubectl get all -o wide --all-namespaces"
               echo 1>&2 "Welcome to the development shell!"
             '';
           };

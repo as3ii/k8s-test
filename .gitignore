@@ -1,6 +1,7 @@
 /result
 
-**/inventory
+**/inventory.yaml
+**/kubeconfig
 
 # terraform
 **/.terraform/*

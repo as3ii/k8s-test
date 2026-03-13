@@ -1,0 +1,58 @@
+---
+- name: Reset cluster
+  gather_facts: false
+  hosts: all
+
+  tasks:
+    - name: Stop and disable services
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        state: stopped
+        enabled: false
+      failed_when: false
+      loop:
+        - k3s
+        - k3s-init
+
+    - name: Kill containerd
+      ansible.builtin.command: pkill -9 containerd
+      register: pkill
+      changed_when: pkill.rc == 0 # 0 means process where killed, 1 means no process found
+      failed_when: pkill.rc > 1 # 2 means syntax error, 3 means fatal error
+
+    - name: Unmount k3s/containerd FSs
+      ansible.builtin.include_tasks: unmount_fs.yaml
+      loop:
+        - /run/k3s
+        - /run/netns/cni-
+        - /var/lib/kubelet
+        - /var/lib/rancher
+      loop_control:
+        loop_var: mountpoint
+
+    - name: Remove k3s files
+      ansible.builtin.file:
+        name: "{{ item }}"
+        state: absent
+      loop:
+        - /usr/local/bin/k3s
+        - /usr/local/bin/kubectl
+        - /etc/cni
+        - /etc/rancher
+        - /etc/systemd/system/k3s.service
+        - /etc/systemd/system/k3s-init.service
+        - /run/k3s
+        - /run/flannel
+        - /run/containerd
+        - /var/lib/cni
+        - /var/lib/kubelet
+        - /var/lib/rancher
+
+    - name: Reload daemon_reload
+      ansible.builtin.systemd:
+        daemon_reload: true
+
+    - name: Reboot
+      ansible.builtin.reboot:
+        post_reboot_delay: 10
+        reboot_timeout: 300
