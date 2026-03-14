@@ -15,7 +15,7 @@
 
 - name: Copy kubevip-ds.yaml manifest
   ansible.builtin.template:
-    src: ./kubevip.yaml.j2
+    src: ./kube-vip/kubevip.yaml.j2
     dest: /var/lib/rancher/k3s/server/manifests/kubevip.yaml
     mode: "640"
   when: inventory_hostname == groups["nodes"][0]
@@ -29,7 +29,7 @@
 
 - name: Copy kubevip-cc.yaml manifest
   ansible.builtin.template:
-    src: ./kubevip-cc.yaml.j2
+    src: ./kube-vip/kubevip-cc.yaml.j2
     dest: /var/lib/rancher/k3s/server/manifests/kubevip-cc.yaml
     mode: "640"
   when: inventory_hostname == groups["nodes"][0]
