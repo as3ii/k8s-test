@@ -135,8 +135,8 @@ resource "proxmox_vm_qemu" "kube" {
     #limit   = 4
     #units   = 1024
   }
-  memory  = 2355
-  balloon = 512 # Minimum allocated memory
+  memory  = 2048
+  balloon = 1024 # Minimum allocated memory
 
   # High Availability settings
   #hastate = ""
