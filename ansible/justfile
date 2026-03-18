@@ -9,8 +9,8 @@ check:
 dry:
     ansible-playbook main.yaml --check
 
-deploy:
-    ansible-playbook main.yaml
+deploy tags="all":
+    ansible-playbook main.yaml --tags {{tags}}
 
 reset:
     ansible-playbook reset/reset.yaml

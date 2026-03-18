@@ -39,7 +39,12 @@
       when: inventory_hostname == groups["nodes"][0]
 
     - name: Setup kube-vip and kube-vip-cloud-controller
-      ansible.builtin.include_tasks: ./kube-vip.yaml
+      ansible.builtin.include_tasks:
+        file: ./kube-vip.yaml
+        apply:
+          tags: kube-vip
+      when: inventory_hostname == groups["nodes"][0]
+      tags: kube-vip
 
     - name: Join cluster via transient k3s-init service
       ansible.builtin.command:

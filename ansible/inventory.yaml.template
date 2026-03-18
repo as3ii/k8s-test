@@ -10,7 +10,7 @@ all:
     # VIP variables
     api_domain: kube.domain.com # Used for the SAN certificate
     api_ip: 10.0.0.100
-    kubevip_iprange: 10.0.0.101,10.0.0.150
+    kubevip_iprange: 10.0.0.101-10.0.0.150
     kubevip_version: v1.0.4
     # K3s variables
     token: asdfg-superSECRET-123456789

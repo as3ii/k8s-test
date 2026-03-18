@@ -4,32 +4,27 @@
     path: /var/lib/rancher/k3s/server/manifests
     state: directory
     mode: "640"
-  when: inventory_hostname == groups["nodes"][0]
 
 - name: Get kube-vip rbac manifest
   ansible.builtin.get_url:
     url: https://kube-vip.io/manifests/rbac.yaml
     dest: /var/lib/rancher/k3s/server/manifests/kubevip-rbac.yaml
     mode: "640"
-  when: inventory_hostname == groups["nodes"][0]
 
 - name: Copy kubevip-ds.yaml manifest
   ansible.builtin.template:
     src: ./kube-vip/kubevip.yaml.j2
     dest: /var/lib/rancher/k3s/server/manifests/kubevip.yaml
     mode: "640"
-  when: inventory_hostname == groups["nodes"][0]
 
 - name: Get kube-vip-cloud-controller rbac manifest
   ansible.builtin.get_url:
     url: https://raw.githubusercontent.com/kube-vip/kube-vip-cloud-provider/refs/heads/main/manifest/kube-vip-cloud-controller.yaml
     dest: /var/lib/rancher/k3s/server/manifests/kubevip-cc-rbac.yaml
     mode: "640"
-  when: inventory_hostname == groups["nodes"][0]
 
 - name: Copy kubevip-cc.yaml manifest
   ansible.builtin.template:
     src: ./kube-vip/kubevip-cc.yaml.j2
     dest: /var/lib/rancher/k3s/server/manifests/kubevip-cc.yaml
     mode: "640"
-  when: inventory_hostname == groups["nodes"][0]

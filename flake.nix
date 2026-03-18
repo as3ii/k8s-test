@@ -32,6 +32,32 @@
           pkgs,
           ...
         }:
+        let
+          mkScript =
+            name: text:
+            let
+              script = pkgs.writeShellScriptBin name text;
+            in
+            script;
+          scripts = [
+            (mkScript "kwatch" ''
+              watch -t -n5 '
+                  printf " --- Pods ---\n"
+                  ${pkgs.kubectl}/bin/kubectl get pods -o wide --all-namespaces
+                  printf " --- Services ---\n"
+                  ${pkgs.kubectl}/bin/kubectl get service --all-namespaces
+                  printf " --- Daemonsets ---\n"
+                  ${pkgs.kubectl}/bin/kubectl get daemonset --all-namespaces
+                  printf " --- Deployments ---\n"
+                  ${pkgs.kubectl}/bin/kubectl get deployment --all-namespaces
+                  printf " --- Replicasets ---\n"
+                  ${pkgs.kubectl}/bin/kubectl get replicaset --all-namespaces
+                  printf " --- Jobs ---\n"
+                  ${pkgs.kubectl}/bin/kubectl get job --all-namespaces
+              '
+            '')
+          ];
+        in
         {
           formatter = pkgs.nixfmt-tree;
 
@@ -61,18 +87,21 @@
           };
 
           devShells.default = pkgs.mkShell {
-            packages = with pkgs; [
-              config.pre-commit.settings.enabledPackages
-              ansible
-              opentofu
-              just
-              kubectl
-            ];
+            packages =
+              with pkgs;
+              [
+                config.pre-commit.settings.enabledPackages
+                ansible
+                opentofu
+                just
+                kubectl
+                k9s
+              ]
+              ++ scripts;
 
             shellHook = ''
               ${config.pre-commit.shellHook}
               export KUBECONFIG="./kubeconfig"
-              alias kwatch="watch -- kubectl get all -o wide --all-namespaces"
               echo 1>&2 "Welcome to the development shell!"
             '';
           };
