@@ -136,7 +136,7 @@ resource "proxmox_vm_qemu" "kube" {
     #units   = 1024
   }
   memory  = 2048
-  balloon = 1024 # Minimum allocated memory
+  balloon = 1740 # Minimum allocated memory
 
   # High Availability settings
   #hastate = ""
@@ -169,7 +169,7 @@ resource "proxmox_vm_qemu" "kube" {
       scsi0 {
         disk {
           storage    = "local"
-          size       = "3G"
+          size       = "5G"
           iothread   = true
           discard    = true
           emulatessd = true
