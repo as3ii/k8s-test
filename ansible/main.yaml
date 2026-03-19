@@ -90,15 +90,6 @@
       ansible.builtin.wait_for:
         path: /var/lib/rancher/k3s/server/node-token
 
-    - name: Read node-token from master
-      ansible.builtin.slurp:
-        src: /var/lib/rancher/k3s/server/node-token
-      register: node_token
-
-    - name: Store Master node-token
-      ansible.builtin.set_fact:
-        token: "{{ node_token.content | b64decode | regex_replace('\n', '') }}"
-
     - name: Configure cluster endpoint
       ansible.builtin.command: k3s kubectl config set-cluster default --server https://{{ api_domain }}:6443
       changed_when: true
@@ -115,3 +106,11 @@
         dest: ../kubeconfig
         flat: true
       when: inventory_hostname == groups["nodes"][0]
+
+    - name: Setup other services via helm
+      ansible.builtin.include_tasks:
+        file: ./helm.yaml
+        apply:
+          tags: helm
+      when: inventory_hostname == groups["nodes"][0]
+      tags: helm

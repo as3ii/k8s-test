@@ -1,0 +1,43 @@
+---
+- name: Setup External-DNS
+  ansible.builtin.template:
+    src: helm/external-dns.yaml.j2
+    dest: "/var/lib/rancher/k3s/server/manifests/external-dns.yaml"
+    mode: "600"
+    owner: root
+  when: externaldns_chart_version is defined
+
+- name: Setup CSI-driver-NFS
+  ansible.builtin.template:
+    src: helm/csi-driver-nfs.yaml.j2
+    dest: "/var/lib/rancher/k3s/server/manifests/csi-driver-nfs.yaml"
+    mode: "600"
+    owner: root
+  when: csinfs_chart_version is defined
+
+- name: Setup cert-manager
+  ansible.builtin.template:
+    src: helm/cert-manager.yaml.j2
+    dest: "/var/lib/rancher/k3s/server/manifests/cert-manager.yaml"
+    mode: "600"
+    owner: root
+  when: certmanager_chart_version is defined
+
+- name: Create traefik wildcard certificates
+  ansible.builtin.template:
+    src: helm/traefik/wildcard-cert.yaml.j2
+    dest: "/var/lib/rancher/k3s/server/manifests/traefik-wildcard-cert.yaml"
+    mode: "600"
+    owner: root
+  when: certmanager_chart_version is defined
+
+- name: Setup traefik
+  ansible.builtin.template:
+    src: "helm/{{ item.src }}"
+    dest: "/var/lib/rancher/k3s/server/manifests/{{ item.dest }}"
+    mode: "600"
+    owner: root
+  loop:
+    - { src: traefik.yaml.j2, dest: traefik-main.yaml }
+    - { src: traefik/mw-default-headers.yaml.j2, dest: traefik-mw-default-headers.yaml }
+    - { src: traefik/dashboard.yaml.j2, dest: traefik-dashboard.yaml }

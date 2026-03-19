@@ -1,0 +1,60 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+   name: traefik
+   labels:
+      name: traefik
+
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  repo: https://traefik.github.io/charts
+  chart: traefik
+  targetNamespace: traefik
+  version: "{{ traefik_chart_version }}"
+  valuesContent: |-
+    additionalArguments:
+      - "--serverstransport.insecureSkipVerify=true"
+    global:
+      checkNewVersion: false
+      sendAnonymousUsage: false
+    deployment:
+      replicas: 3
+    ingressRoute:
+      dashboard:
+        enabled: false # set to true only for debug in testing environment
+        matchRule: PathPrefix(`/dashboard`) || PathPrefix(`/api`)
+        entryPoints: [web, websecure]
+    providers:
+      kubernetesCRD:
+        enabled: true
+        ingressClass: traefik-external
+      kubernetesIngress:
+        enabled: true
+      kubernetesGateway:
+        enabled: true
+    service:
+      annotations:
+        external-dns.alpha.kubernetes.io/hostname: {{ traefik_domain }}
+    ports:
+      web:
+        http:
+          redirections:
+            entrypoint:
+              to: websecure
+              scheme: https
+              permanent: true
+        observability:
+          metrics: false
+          accessLogs: false
+          tracing: false
+      websecure:
+        asDefault: true
+        http:
+          tls:
+            enabled: true

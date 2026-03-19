@@ -23,11 +23,15 @@ cd ..
 ```
 
 ### VMs setup and deploy k3s
-This will setup kube-vip via static charts
+This will setup kube-vip via static charts and traefix, cert-manager, NFS CSI
+driver and ExternalDNS via helm (using helm-controller)
 ```bash
 cd ansible
 cp inventory.yaml.template inventory.yaml
 # edit inventory.yaml
+# optionally customize the various .yaml.j2 in the helm directory
 just deploy
 cd ..
 ```
+Note: if enabled, the TLS certificate request can take several minutes.
+Monitor the progress via `kubectl get certificaterequest -A`

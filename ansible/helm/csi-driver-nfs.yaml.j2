@@ -1,0 +1,42 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+   name: csi-driver-nfs
+   labels:
+      name: csi-driver-nfs
+
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: csi-driver-nfs
+  namespace: kube-system
+spec:
+  repo: https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
+  chart: csi-driver-nfs
+  targetNamespace: csi-driver-nfs
+  version: "{{ csinfs_chart_version }}"
+  valuesContent: |-
+    controller:
+      replicas: 1
+      runOnControlPlane: true
+    storageClasses:
+      - name: nfs-delete
+        annotations:
+          storageclass.kubernetes.io/is-default-class: "true"
+        parameters:
+          server: "{{ csinfs_server }}"
+          share: "{{ csinfs_path }}"
+        reclaimPolicy: Delete
+        volumeBindingMode: Immediate
+        mountOptions:
+          - nfsvers="{{ csinfs_version }}"
+      - name: nfs-retain
+        parameters:
+          server: "{{ csinfs_server }}"
+          share: "{{ csinfs_path }}/data"
+        reclaimPolicy: Retain
+        volumeBindingMode: Immediate
+        mountOptions:
+          - nfsvers="{{ csinfs_version }}"

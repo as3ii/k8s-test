@@ -1,0 +1,70 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cert-manager
+  labels:
+    name: cert-manager
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  namespace: cert-manager
+  name: dns-api-token
+stringData:
+  api-token: "{{ certmanager_api_token }}"
+
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: cert-manager
+  namespace: kube-system
+spec:
+  repo: https://charts.jetstack.io
+  chart: cert-manager
+  targetNamespace: cert-manager
+  version: "{{ certmanager_chart_version }}"
+  valuesContent: |-
+    namespace: cert-manager
+    crds:
+      enabled: true
+    replicaCount: 1
+    podDnsPolicy: None
+    podDnsConfig:
+      nameservers:
+        - 9.9.9.9
+        - 149.112.112.112
+    dns01RecursiveNameserversOnly: true
+    dns01RecursiveNameservers: 9.9.9.9:53,149.112.112.112:53
+
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging
+spec:
+  acme:
+    email: {{ certmanager_email }}
+    #profile: tlsserver # default: classic
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: letsencrypt-staging-account-key
+    solvers:
+      {{ certmanager_solver }}
+
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-production
+spec:
+  acme:
+    email: {{ certmanager_email }}
+    #profile: tlsserver # default: classic
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: letsencrypt-production-account-key
+    solvers:
+      {{ certmanager_solver }}

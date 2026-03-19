@@ -1,0 +1,62 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  namespace: traefik
+  name: traefik-dashboard-auth-secret
+stringData:
+   users: "{{ traefik_dashboard_auth }}"
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  namespace: traefik
+  name: traefik-dashboard-auth
+spec:
+  basicAuth:
+    secret: traefik-dashboard-auth-secret
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  namespace: traefik
+  name: traefik-dashboard
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+    #external-dns.alpha.kubernetes.io/hostname: dashboard.{{ traefik_domain }}
+    external-dns.alpha.kubernetes.io/target: {{ traefik_domain }}
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - kind: Rule
+    match: Host(`dashboard.{{ traefik_domain }}`)
+    middlewares:
+      - name: default-headers
+        namespace: traefik
+      - name: traefik-dashboard-auth
+        namespace: traefik
+    observability:
+      accessLogs: true
+      metrics: true
+      tracing: true
+    #priority: 10
+    services:
+    - kind: TraefikService
+      name: api@internal
+      # passHostHeader: true
+      # port: 80
+      # responseForwarding:
+        # flushInterval: 1ms
+      # scheme: https
+      # sticky:
+        # cookie:
+          # httpOnly: true
+          # name: cookie
+          # secure: true
+      # strategy: wrr
+      # weight: 10
+  tls:
+    secretName: traefik-production-cert-tls

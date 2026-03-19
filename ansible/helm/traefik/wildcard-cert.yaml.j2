@@ -1,0 +1,31 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  namespace: traefik
+  name: traefik-staging-cert
+spec:
+  secretName: traefik-staging-cert-tls
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-staging
+  commonName: "*.{{ traefik_domain }}"
+  dnsNames:
+     - "{{ traefik_domain }}"
+     - "*.{{ traefik_domain }}"
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  namespace: traefik
+  name: traefik-production-cert
+spec:
+  secretName: traefik-production-cert-tls
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-production
+  commonName: "*.{{ traefik_domain }}"
+  dnsNames:
+     - "{{ traefik_domain }}"
+     - "*.{{ traefik_domain }}"

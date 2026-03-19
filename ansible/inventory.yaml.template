@@ -12,6 +12,35 @@ all:
     api_ip: 10.0.0.100
     kubevip_iprange: 10.0.0.101-10.0.0.150
     kubevip_version: v1.0.4
+    # External-DNS variables (RFC2136, optional)
+    externaldns_chart_version: 1.20.0 # Comment this to disable
+    externaldns_server: 10.0.0.2 # Address of the authoritative DNS server
+    externaldns_key_name: tsig-key. # Must end with a dot
+    externaldns_key_algorithm: hmac-sha256 # Optional, defaults to hmac-sha256
+    externaldns_key_secret: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    externaldns_dns_zone: mydomain.com. # Fully qualified domain name
+    # CSI-driver-NFS variables (optional)
+    csinfs_chart_version: 4.13.1 # Comment this to disable
+    csinfs_server: nfs.domain.com # IP/domain of the NFS server
+    csinfs_path: /mnt/share # Server mountpoint
+    csinfs_version: "4.2" # NFS version to use
+    # Cert-manager variables (optional)
+    certmanager_chart_version: 1.20.0 # Comment this to disable
+    certmanager_email: user@example.com
+    certmanager_solver: # Solver config
+      - dns01:
+        cloudflare:
+          apiTokenSecretRef:
+            name: dns-api-token
+            key: api-token
+        selector:
+          dnsZones:
+            - "domain.com"
+    certmanager_api_token: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    # Traefik variables (dashboard available at dashboard.{traefik_domain})
+    traefik_chart_version: 39.0.5
+    traefik_domain: kube.domain.com
+    traefik_dashboard_auth: # htpasswd output
     # K3s variables
     token: asdfg-superSECRET-123456789
     k3s_version: v1.35.1+k3s1
