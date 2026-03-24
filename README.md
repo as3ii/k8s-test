@@ -1,4 +1,4 @@
-# Kube-cluster
+# k8s-test
 
 ### Create the VM template in proxmox (based on debian 13)
 ```bash
@@ -18,6 +18,8 @@ qm template 9100
 ### Deploy VMs and basic DNS records
 ```bash
 cd terraform
+cp credentials.auto.tfvars.template credentials.auto.tfvars
+# edit credentials.auto.tfvars
 just deploy
 cd ..
 ```
