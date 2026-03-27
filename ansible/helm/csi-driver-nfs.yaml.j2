@@ -21,6 +21,8 @@ spec:
     controller:
       replicas: 1
       runOnControlPlane: true
+    externalSnapshotter:
+      enabled: true
     storageClasses:
       - name: nfs-delete
         annotations:
@@ -31,7 +33,7 @@ spec:
         reclaimPolicy: Delete
         volumeBindingMode: Immediate
         mountOptions:
-          - nfsvers="{{ csinfs_version }}"
+          - nfsvers={{ csinfs_version }}
       - name: nfs-retain
         parameters:
           server: "{{ csinfs_server }}"
@@ -39,4 +41,4 @@ spec:
         reclaimPolicy: Retain
         volumeBindingMode: Immediate
         mountOptions:
-          - nfsvers="{{ csinfs_version }}"
+          - nfsvers={{ csinfs_version }}

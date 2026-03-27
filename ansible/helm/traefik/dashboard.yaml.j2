@@ -27,6 +27,7 @@ metadata:
     kubernetes.io/ingress.class: traefik-external
     #external-dns.alpha.kubernetes.io/hostname: dashboard.{{ traefik_domain }}
     external-dns.alpha.kubernetes.io/target: {{ traefik_domain }}
+    # cert-manager.io/cluster-issuer: letsencrypt-production
 spec:
   entryPoints:
     - websecure

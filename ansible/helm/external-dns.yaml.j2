@@ -54,3 +54,11 @@ spec:
     sources:
       - traefik-proxy
       - service # See extraArgs: --service-type-filter
+      - ingress
+      - gateway-grpcroute
+      - gateway-httproute
+      # TLSRoute requires gateway-api crd >= v1.5.0
+      #- gateway-tlsroute
+      # The following requires experimental gateway-api crd
+      #- gateway-tcproute
+      #- gateway-udproute

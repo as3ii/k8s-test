@@ -38,7 +38,7 @@ all:
             - "domain.com"
     certmanager_api_token: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     # Traefik variables (dashboard available at dashboard.{traefik_domain})
-    traefik_chart_version: 39.0.5
+    traefik_chart_version: 39.0.6
     traefik_domain: kube.domain.com
     traefik_dashboard_auth: # htpasswd output
     # K3s variables

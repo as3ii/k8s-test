@@ -38,9 +38,12 @@ spec:
         enabled: true
       kubernetesGateway:
         enabled: true
+        # experimentalChannel: true
     service:
       annotations:
         external-dns.alpha.kubernetes.io/hostname: {{ traefik_domain }}
+      spec:
+        externalTrafficPolicy: Local
     ports:
       web:
         http:
@@ -58,3 +61,8 @@ spec:
         http:
           tls:
             enabled: true
+    logs:
+      access:
+        enabled: true
+        filters:
+          statuscodes: 400-599
