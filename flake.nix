@@ -8,12 +8,17 @@
       url = "github:cachix/git-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    press = {
+      url = "github:RossSmyth/press/48381e15558364748441b8b540a0734295f9663a";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
     {
       flake-parts,
       git-hooks-nix,
+      press,
       ...
     }@inputs:
     flake-parts.lib.mkFlake { inherit inputs; } {
@@ -30,6 +35,7 @@
         {
           config,
           pkgs,
+          system,
           ...
         }:
         let
@@ -56,9 +62,19 @@
                   ${pkgs.kubectl}/bin/kubectl get job --all-namespaces
               '
             '')
+            (mkScript "typstformat" ''
+              echo "Formatting $PWD/docs/typst/"
+              ${pkgs.typstyle}/bin/typstyle -v --wrap-text -i $PWD/docs/typst/
+            '')
           ];
         in
         {
+          _module.args.pkgs = import inputs.nixpkgs {
+            inherit system;
+            overlays = [ (import press) ];
+            config = { };
+          };
+
           formatter = pkgs.nixfmt-tree;
 
           pre-commit = {
@@ -86,6 +102,25 @@
             };
           };
 
+          packages = builtins.listToAttrs (
+            map
+              (lang: {
+                name = "docs-${lang}";
+                value = pkgs.buildTypstDocument {
+                  name = "report-${lang}";
+                  src = ./docs/typst;
+                  file = "main.typ";
+                  inputs."language" = "${lang}";
+                  format = "pdf";
+                  typstEnv = p: [ p.note-me ];
+                };
+              })
+              [
+                # "en"
+                "it"
+              ]
+          );
+
           devShells.default = pkgs.mkShell {
             packages =
               with pkgs;
@@ -96,6 +131,7 @@
                 just
                 kubectl
                 k9s
+                typstyle
               ]
               ++ scripts;
 
