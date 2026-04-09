@@ -8,10 +8,7 @@
       url = "github:cachix/git-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    press = {
-      url = "github:RossSmyth/press/48381e15558364748441b8b540a0734295f9663a";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    press.url = "github:RossSmyth/press/2ddb03960ebefc9524a50126f5b356f1cd97521f";
   };
 
   outputs =

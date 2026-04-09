@@ -109,23 +109,18 @@
       }
     },
     "press": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
       "locked": {
-        "lastModified": 1772323879,
-        "narHash": "sha256-1FmFdPXACYhOt5d7y/3dgbRL3YXpk/DxcgLmcKYAuYM=",
+        "lastModified": 1775348074,
+        "narHash": "sha256-79bn/dcQFaU+odZ+zSS5I02svEKenjL/M6jUXdocGe0=",
         "owner": "RossSmyth",
         "repo": "press",
-        "rev": "48381e15558364748441b8b540a0734295f9663a",
+        "rev": "2ddb03960ebefc9524a50126f5b356f1cd97521f",
         "type": "github"
       },
       "original": {
         "owner": "RossSmyth",
         "repo": "press",
-        "rev": "48381e15558364748441b8b540a0734295f9663a",
+        "rev": "2ddb03960ebefc9524a50126f5b356f1cd97521f",
         "type": "github"
       }
     },
